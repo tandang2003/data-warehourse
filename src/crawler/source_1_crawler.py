@@ -1,9 +1,24 @@
+from selenium.webdriver.support.wait import WebDriverWait
+
 from src.config import SOURCE_A_URL
 from src.crawler import BaseCrawler
+from selenium.webdriver.common.by import By
 
 
 class Source1Crawler(BaseCrawler):
     _base_url = "https://batdongsan.com.vn"
+
+    def setJwt(self):
+        self.driver.get("https://batdongsan.com.vn/sellernet/trang-dang-nhap")
+        WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
+        username_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='username']")
+        password_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='password']")
+        username_input.send_keys(USERNAME)
+        password_input.send_keys(PASSWORD)
+        login_btn = self.driver.find_element(By.ID, "signin-button")
+        login_btn.click()
+        print("Logged in")
+        self.wait(5)
 
     def crawl(self):
         self.get_url(SOURCE_A_URL)
@@ -32,13 +47,14 @@ class Source1Crawler(BaseCrawler):
 
     def crawlItem(self, url):
         self.get_url(url)
-        button = self.driver.find_element_by_css_selector(".phoneEvent")
-        button.click()
-
         print(f"Visiting {SOURCE_A_URL}")
 
+        # WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
         # Wait for 5 seconds
-        self.wait(5)
+        # self.wait(5)
+        # self.driver.execute_script(f'document.querySelector(".js__phone").click()')
+
+        self.wait(10)
 
         driver = self.driver.page_source
         self.filter_script(driver)
@@ -63,9 +79,12 @@ class Source1Crawler(BaseCrawler):
             result["properties"][key] = value
 
         seller = self.soup.select_one(".js__ob-agent-info")
+        email_selector = seller.select_one("#email")
         result['agent'] = {
             'avatar': seller.select_one("a").get("href"),
-            'fullname': seller.select_one("a").get_text(strip=True),
+            'fullname': seller.select_one(".js_contact-name").get("title"),
+            # 'phone': self.soup.select_one(".js__phone").get("mobile"),
+            'email': email_selector.get("data-email") if email_selector else None,
         }
 
         return result

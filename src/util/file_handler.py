@@ -1,10 +1,10 @@
 import pandas as pd
 import os
 import json
-
-from exceptiongroup import catch
+import csv
 
 from src.config import FOLDER_DATA
+from src.util.flat_data import flatten_json
 
 
 def write_to_csv(filename, data):
@@ -34,3 +34,30 @@ def write_json_to_file(file_name, data):
     except Exception as e:
         print(f"Error: {e}")
     json_file.close()
+
+
+def read_file_to_json(file_name):
+    location = os.path.join(FOLDER_DATA, file_name)
+    with open(location, 'r', encoding='utf-8') as file:
+        # Load the data from the file and convert it to a Python object
+        return json.load(file)
+
+def write_json_to_csv(file_name, data):
+    flattened_data = [flatten_json(obj) for obj in data]
+
+    columns = set()
+    for item in flattened_data:
+        columns.update(item.keys())
+
+    columns = sorted(columns)
+    location = os.path.join(FOLDER_DATA, file_name)
+    with open(location, 'w', newline='') as csvfile:
+        # Create the CSV DictWriter with all possible fieldnames (keys)
+        writer = csv.DictWriter(csvfile, fieldnames=columns)
+
+        # Write the header (column names)
+        writer.writeheader()
+
+        # Write each flattened JSON object as a row in the CSV
+        for row in flattened_data:
+            writer.writerow(row)

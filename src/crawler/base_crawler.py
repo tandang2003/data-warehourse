@@ -4,6 +4,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import time
 
+from src.config import U_BLOCK
+
 
 class BaseCrawler:
     def __init__(self, driver_path):
@@ -25,7 +27,6 @@ class BaseCrawler:
     def get_url(self, url):
         if self.driver is None:
             raise Exception("Driver not initialized. Call setup_driver() first.")
-        self.setJwt()
         self.driver.get(url)
 
     def wait(self, seconds):
