@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.config import SOURCE_A_URL
@@ -13,8 +15,8 @@ class Source1Crawler(BaseCrawler):
         WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
         username_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='username']")
         password_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='password']")
-        username_input.send_keys(USERNAME)
-        password_input.send_keys(PASSWORD)
+        # username_input.send_keys(USERNAME)
+        # password_input.send_keys(PASSWORD)
         login_btn = self.driver.find_element(By.ID, "signin-button")
         login_btn.click()
         print("Logged in")
@@ -61,7 +63,7 @@ class Source1Crawler(BaseCrawler):
 
         title = self.soup.select_one(".pr-title").get_text(strip=True)
         address = self.soup.select_one(".js__pr-address").get_text(strip=True)
-        description = self.soup.select_one(".re__detail-content").decode_contents()
+        description = self.soup.select_one(".re__detail-content").get_text(strip=True)
         images = self.soup.select(".slick-track img")
         result = {
             "Subject": title,
@@ -87,6 +89,10 @@ class Source1Crawler(BaseCrawler):
             'email': email_selector.get("data-email") if email_selector else None,
         }
 
+        result["created_at"] = datetime.now().strftime("%H:%M %d:%m:%Y")
+        info = self.soup.select(".js__pr-config-item")
+        result['start_date'] = info[0].select_one(".value").get_text(strip=True)
+        result['end_date'] = info[1].select_one(".value").get_text(strip=True)
         return result
 
 # class Converter(IConverter):
