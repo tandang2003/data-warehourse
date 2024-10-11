@@ -2,9 +2,10 @@ from datetime import datetime
 
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.config import SOURCE_A_URL
-from src.crawler import BaseCrawler
 from selenium.webdriver.common.by import By
+
+from src.config.setting import SOURCE_A_URL
+from src.crawler.base_crawler import BaseCrawler
 
 
 class Source1Crawler(BaseCrawler):
@@ -41,15 +42,18 @@ class Source1Crawler(BaseCrawler):
         items = []
         for (natural_id, link) in id_link.items():
             item = self.crawlItem(link)
+            if item is None:
+                item = {"error": "Can't crawl this item"}
             item["natural_id"] = natural_id
             item["src"] = link
             items.append(item)
+            print(f"{item}")
         self.close()
         return items
 
     def crawlItem(self, url):
         self.get_url(url)
-        print(f"Visiting {SOURCE_A_URL}")
+        print(f"Visiting {url}")
 
         # WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
         # Wait for 5 seconds
@@ -57,7 +61,9 @@ class Source1Crawler(BaseCrawler):
         # self.driver.execute_script(f'document.querySelector(".js__phone").click()')
 
         self.wait(10)
-
+        current_url = self.driver.current_url
+        if current_url != url:
+            return None
         driver = self.driver.page_source
         self.filter_script(driver)
 
@@ -94,19 +100,3 @@ class Source1Crawler(BaseCrawler):
         result['start_date'] = info[0].select_one(".value").get_text(strip=True)
         result['end_date'] = info[1].select_one(".value").get_text(strip=True)
         return result
-
-# class Converter(IConverter):
-#     def __init__(self, data):
-#         self.data = data
-#
-#     def convert(self):
-#         converted_data = []
-#         for item in self.data:
-#             converted_data.append({
-#                 "Subject": item["Subject"],
-#                 "Address": item["Address"],
-#                 "Price": item["Price"],
-#                 "Area": item["Area"],
-#                 "Description": item["Description"]
-#             })
-#         return converted_data
