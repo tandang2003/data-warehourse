@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from src.config import DRIVER_PATH
+from src.config.setting import DRIVER_PATH
 from src.crawler.source_1_crawler import Source1Crawler
-from src.util import write_json_to_csv
+from src.util.file_handler import write_json_to_csv
 
 
 def run_crawlers():
@@ -17,4 +17,5 @@ def run_crawlers():
 
 
 if __name__ == "__main__":
+    print("Running crawlers...")
     run_crawlers()

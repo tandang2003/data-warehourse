@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=PATH_ENV)
 config = dotenv_values(PATH_ENV)
 SOURCE_A_URL = config["SOURCE_A_URL"]
 os_name = platform.system()
-DRIVER_PATHl = ""
+DRIVER_PATH = ""
 if os_name == "Windows":
     DRIVER_PATH = os.path.join(ROOT_DIR, "driver/chromedriver-win64/chromedriver.exe")
 elif os_name == "Linux":

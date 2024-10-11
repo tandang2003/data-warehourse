@@ -3,7 +3,7 @@ import os
 import json
 import csv
 
-from src.config import FOLDER_DATA
+from src.config.setting import FOLDER_DATA
 from src.util.flat_data import flatten_json
 
 
@@ -41,6 +41,7 @@ def read_file_to_json(file_name):
     with open(location, 'r', encoding='utf-8') as file:
         # Load the data from the file and convert it to a Python object
         return json.load(file)
+
 
 def write_json_to_csv(file_name, data):
     flattened_data = [flatten_json(obj) for obj in data]
