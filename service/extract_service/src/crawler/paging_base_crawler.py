@@ -11,7 +11,7 @@ class PagingBase(BaseCrawler):
         self._current_page = 1
         self._limit_page = limit_page
         # # Chứa danh sách url item
-        # self._list_url = []
+        self._list_url = []
         # Chứa danh sách item đã cào được
         self._list_item = []
 
@@ -19,7 +19,7 @@ class PagingBase(BaseCrawler):
         super().setup_driver(headless=True)
         self.before_run()
 
-        for (page) in range(self._limit_page):
+        for (page) in range(1, self._limit_page):
             list_url = self.crawl_page(page)
             list_item_each_page = []
             for (url) in list_url:

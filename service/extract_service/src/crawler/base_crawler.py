@@ -9,8 +9,8 @@ from webdriver_manager.core.os_manager import ChromeType
 
 class BaseCrawler:
     def __init__(self):
-        self.driver = None
-        self.soup = None
+        self.driver: webdriver
+        self.soup: BeautifulSoup
 
     def setup_driver(self, headless=False, disable_resource=False):
         chrome_options = webdriver.ChromeOptions()
