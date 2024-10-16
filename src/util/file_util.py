@@ -41,7 +41,6 @@ def read_file_to_json(file_name):
         # Load the data from the file and convert it to a Python object
         return json.load(file)
 
-
 def write_json_to_csv(file_name, json_list):
     """
             Flatten a list of JSON objects and write it to a CSV file.
@@ -55,6 +54,8 @@ def write_json_to_csv(file_name, json_list):
     # Create the directory if it does not exist
     os.makedirs(FOLDER_DATA, exist_ok=True)
     location = os.path.join(FOLDER_DATA, file_name)
-
+    print(location)
     # Save the DataFrame to a CSV file
     df.to_csv(location, index=False, encoding='utf-8')
+
+

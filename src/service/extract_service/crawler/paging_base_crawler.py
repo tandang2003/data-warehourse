@@ -27,6 +27,7 @@ class PagingBase(BaseCrawler):
                     if not check_url_valid(url):
                         raise NameError
                     item_crawled = self.crawl_item(url)
+                    print(item_crawled)
                     self._list_item.append(item_crawled)
                     self.after_run_each_item(item_crawled)
                 except NameError:
@@ -34,7 +35,7 @@ class PagingBase(BaseCrawler):
             self.after_run_each_page(list_item_each_page)
             list_item_each_page.clear()
             self._current_page += 1
-
+        print(self._list_item)
         self.after_run()
 
     @abstractmethod

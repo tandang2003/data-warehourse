@@ -19,4 +19,4 @@ SOURCE_B_2 = config["SOURCE_B_2"]
 SOURCE_B_3 = config["SOURCE_B_3"]
 LIMIT_ITEM = int(config["LIMIT_ITEM"])
 LIMIT_PAGE = int(config["LIMIT_PAGE"])
-FOLDER_DATA = os.path.join(ROOT_DIR.parent.parent, "data")
+FOLDER_DATA = os.path.join(ROOT_DIR, "data")

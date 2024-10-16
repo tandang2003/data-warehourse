@@ -66,8 +66,7 @@ class SourceB1Crawler(PagingBase):
             "agent": agent,
             "images": self.__extract_imgs()
         }
-        print(result)
-
+        return result
     def __extract_imgs(self):
         tag_img = self.soup.select(".sc-6orc5o-3.ljaVcC img")
         result = []
