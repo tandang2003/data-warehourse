@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
-from service.extract_service.src.crawler.base_crawler import BaseCrawler
-from service.extract_service.src.util.validation_util import check_url_valid
+from src.service.extract_service.crawler.base_crawler import BaseCrawler
+from src.util.validation_util import check_url_valid
 
 
 class PagingBase(BaseCrawler):

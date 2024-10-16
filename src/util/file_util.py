@@ -1,10 +1,9 @@
 import pandas as pd
 import os
 import json
-import csv
 
-from service.extract_service.src.config.setting import FOLDER_DATA
-from service.extract_service.src.util.data_util import flatten_json
+from src.config.setting import FOLDER_DATA
+from src.util.data_util import flatten_json
 
 
 def write_to_csv(filename, data):

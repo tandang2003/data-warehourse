@@ -13,7 +13,6 @@ os_name = platform.system()
 SOURCE_A_BASE = config["SOURCE_A_BASE"]
 SOURCE_A_1 = config["SOURCE_A_1"]
 SOURCE_A_2 = config["SOURCE_A_2"]
-SOURCE_A_3 = config["SOURCE_A_3"]
 SOURCE_B_BASE = config["SOURCE_B_BASE"]
 SOURCE_B_1 = config["SOURCE_B_1"]
 SOURCE_B_2 = config["SOURCE_B_2"]
