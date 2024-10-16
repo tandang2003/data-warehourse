@@ -1,9 +1,6 @@
-from datetime import datetime
-
-from service.extract_service.src.config.setting import LIMIT_PAGE
-from service.extract_service.src.crawler.source_A_1_crawler import SourceA1Crawler
-from service.extract_service.src.crawler.source_B_1_crawler import SourceB1Crawler
-from service.extract_service.src.util.file_util import write_json_to_csv
+from src.config.setting import LIMIT_PAGE
+from src.service.extract_service.crawler.source_A_1_crawler import SourceA1Crawler
+from src.service.extract_service.crawler.source_B_1_crawler import SourceB1Crawler
 
 
 def run_crawlers():

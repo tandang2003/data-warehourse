@@ -2,9 +2,9 @@ from datetime import datetime
 
 from selenium.common import WebDriverException
 
-from service.extract_service.src.config.setting import SOURCE_A_1, SOURCE_A_BASE
-from service.extract_service.src.crawler.paging_base_crawler import PagingBase
-from service.extract_service.src.util.file_util import write_json_to_csv, write_json_to_file
+from src.config.setting import SOURCE_A_1, SOURCE_A_BASE
+from src.service.extract_service.crawler.paging_base_crawler import PagingBase
+from src.util.file_util import write_json_to_csv, write_json_to_file
 
 
 class SourceA1Crawler(PagingBase):

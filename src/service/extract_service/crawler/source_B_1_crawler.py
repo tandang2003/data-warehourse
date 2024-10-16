@@ -1,12 +1,11 @@
-from datetime import datetime
 import re
+from datetime import datetime
 
-from service.extract_service.src.config.setting import SOURCE_B_1, SOURCE_B_BASE, SOURCE_B_2, SOURCE_B_3
-from service.extract_service.src.crawler.paging_base_crawler import PagingBase
-from selenium.common import WebDriverException
-from selenium.webdriver.common.by import By
 from bs4.element import ResultSet
-from bs4.element import Tag
+from selenium.common import WebDriverException
+
+from src.config.setting import SOURCE_B_BASE, SOURCE_B_3
+from src.service.extract_service.crawler.paging_base_crawler import PagingBase
 
 
 class SourceB1Crawler(PagingBase):
