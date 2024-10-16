@@ -6,6 +6,7 @@ from selenium.common import WebDriverException
 
 from src.config.setting import SOURCE_B_BASE, SOURCE_B_3
 from src.service.extract_service.crawler.paging_base_crawler import PagingBase
+from src.util.file_util import write_json_to_file, write_json_to_csv
 
 
 class SourceB1Crawler(PagingBase):
@@ -113,3 +114,14 @@ class SourceB1Crawler(PagingBase):
             return id_match.group(1)
         return None
 
+    def after_run(self):
+        data = self._list_item
+        current_date = datetime.now().strftime("%Y_%m_%d__%H_%M")
+        print(data)
+        write_json_to_file(f"source_2_{current_date}.json", data)
+        filename = f"source_2_{current_date}.csv"
+        write_json_to_csv(filename, data)
+        print(f"Data has been saved to {filename}")
+
+    def handle_error_item(self, error):
+        super().handle_error_item(error)
