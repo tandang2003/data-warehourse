@@ -19,7 +19,7 @@ class PagingBase(BaseCrawler):
         super().setup_driver(headless=True)
         self.before_run()
 
-        for (page) in range(1, self._limit_page):
+        for (page) in range(1, 1 + self._limit_page):
             list_url = self.crawl_page(page)
             list_item_each_page = []
             for (url) in list_url:
