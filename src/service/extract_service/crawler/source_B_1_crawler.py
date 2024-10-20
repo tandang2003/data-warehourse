@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 from datetime import datetime
 
@@ -63,10 +64,10 @@ class SourceB1Crawler(PagingBase):
             "created_at": created_at,
             "src": current_url,
             "agent": agent,
-            "images": self.__extract_imgs()
+            "images": self.__extract_imgs(),
+            "properties": self.__extract_properties()
         }
-        print(result)
-
+        return result
     def __extract_imgs(self):
         tag_img = self.soup.select(".sc-6orc5o-3.ljaVcC img")
         result = []
@@ -86,6 +87,7 @@ class SourceB1Crawler(PagingBase):
             properties[spans[0].get_text()] = spans[1].get_text()
         price = self.soup.select_one(".sc-6orc5o-15.jiDXp div.price").get_text(strip=True)
         properties["price"] = price
+        return properties
 
     def __extract_user(self):
         return {"phone": self.soup.select_one("span.sc-lohvv8-15.fyGvhT").get_text(strip=True),
