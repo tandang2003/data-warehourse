@@ -20,10 +20,9 @@ def run_crawlers():
 
 
 def run_crawler_source_A_1():
-    # source1_crawler = SourceA1Crawler(LIMIT_PAGE)
-    # print(f"Started crawl at: {source1_crawler.base_url}")
-    # source1_crawler.handle()
-    data = read_file_to_json("source_1_2024_10_20__14_36.json")
+    source1_crawler = SourceA1Crawler(LIMIT_PAGE)
+    print(f"Started crawl at: {source1_crawler.base_url}")
+    data= source1_crawler.handle()
     current_date = datetime.now().strftime("%H_%M__%d_%m_%Y")
     filename = f"source_1_{current_date}.csv"
     write_json_to_csv(filename, data)
