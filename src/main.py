@@ -1,9 +1,6 @@
-from datetime import datetime
-
 from src.config.setting import LIMIT_PAGE
 from src.service.extract_service.crawler.source_A_1_crawler import SourceA1Crawler
 from src.service.extract_service.crawler.source_B_1_crawler import SourceB1Crawler
-from src.util.file_util import write_json_to_csv
 
 
 def run_crawlers():
@@ -22,10 +19,7 @@ def run_crawlers():
 def run_crawler_source_A_1():
     source1_crawler = SourceA1Crawler(LIMIT_PAGE)
     print(f"Started crawl at: {source1_crawler.base_url}")
-    data = source1_crawler.handle()
-    current_date = datetime.now().strftime("%H_%M__%d_%m_%Y")
-    filename = f"source_1_{current_date}.csv"
-    write_json_to_csv(filename, data)
+    source1_crawler.handle()
 
 
 def run_crawler_source_B_1():

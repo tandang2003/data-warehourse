@@ -2,7 +2,7 @@ import json
 
 config_crawler_source_A_1 = json.loads(""" 
 {
-  "src": { "method": "url"},
+  "src": {"method": "url"},
   "subject": {
     "method": "text",
     "quantity": 1,
@@ -23,14 +23,14 @@ config_crawler_source_A_1 = json.loads("""
     "method": "text",
     "selector": "//*[contains(@class, 'js__pr-short-info-item')]/*[text()='Mức giá']/following-sibling::*[1]"
   },
-  "description": {                                   
-    "method"  : "description",                                       
+  "description": {
+    "method"  : "description"                                ,
     "selector": "//*[contains(@class, 're__detail-content')]"
   },
-  "image": {
-    "quantity" : null,                                     
-    "method"   : "get_attribute",                           
-    "attribute": "src",                                     
+  "images": {
+    "quantity" : null                                       ,
+    "method"   : "get_attribute"                            ,
+    "attribute": "src"                                      ,
     "selector" : "//*[contains(@class, 'slick-track')]//img"
   },
   "natural_id": {
@@ -69,23 +69,24 @@ config_crawler_source_A_1 = json.loads("""
     "quantity": 1,
     "attribute": "title",
     "method": "get_attribute",
-    "selector": "//*[contains(@class, 'js_contact-name')][1]"
+    "selector": "(//*[contains(@class, 'js_contact-name')])[1]"
   },
-  "avatar": {                                                 
-    "method"  : "text",                                                       
-    "selector": "//*[contains(@class, 'js__agent-contact-avatar')]//img/@src"
+  "avatar": {
+    "quantity": 1,
+    "attribute": "src",
+    "method": "get_attribute",
+    "selector": "//*[contains(@class, 'js__agent-contact-avatar')]"
   },
   "start_date": {
     "method": "text",
+    "quantity": 1,
     "selector": "//*[contains(@class, 'js__pr-config-item')]/*[text()='Ngày đăng']/following-sibling::*[1]"
   },
   "end_date": {
     "method": "text",
+    "quantity": 1,
     "selector": "//*[contains(@class, 'js__pr-config-item')]/*[text()='Ngày hết hạn']/following-sibling::*[1]"
   },
-  "create_at": {
-    "method": "time"
-  }
+  "create_at": {"method": "time"}
 }
 """)
-
