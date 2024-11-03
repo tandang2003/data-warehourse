@@ -42,40 +42,15 @@ def read_file_to_json(file_name):
         return json.load(file)
 
 
-def write_json_to_csv(file_name, json_list):
-    """
-    Convert nested JSON objects to strings and save the list to a CSV file.
-
-    :param file_name: The name of the CSV file.
-    :param json_list: A list of JSON objects to be converted and saved to CSV.
-    :param folder_data: The directory where the CSV file will be saved (default: "output_folder").
-    """
-    # Create the directory if it does not exist
-    os.makedirs(FOLDER_DATA, exist_ok=True)
+def write_json_to_csv(file_name, data):
+    """Save a list of objects to a CSV file."""
+    # Flatten each object in the list
+    for item in data:
+        for key, value in item.items():
+            if isinstance(value, dict):  # Check if the value is a dictionary
+                item[key] = json.dumps(value)  # Convert to JSON string
+    df = pd.DataFrame(data)
     location = os.path.join(FOLDER_DATA, file_name)
-    print(f"Saving CSV to: {location}")
-
-    # Process each item in the json_list
-    for index, item in enumerate(json_list):
-        if item is not None:  # Check if item is not None
-            for key, value in item.items():
-                json_list[index][key] = convert_nested_to_string(value)  # Convert nested data to JSON string
-
-    # Create DataFrame from the modified list, filter out None items
-    json_list = [item for item in json_list if item is not None]  # Remove None items
-    df = pd.DataFrame(json_list)
-
-    # Save the DataFrame to a CSV file
+    os.makedirs(FOLDER_DATA, exist_ok=True)
+    # Create a DataFrame and save to CSV
     df.to_csv(location, index=False, encoding='utf-8')
-
-
-def convert_nested_to_string(data):
-    """
-    Convert nested JSON objects or lists to JSON strings.
-
-    :param data: A potentially nested JSON object (dict or list).
-    :return: The original object or a JSON string if it's nested.
-    """
-    if isinstance(data, (dict, list)):
-        return json.dumps(data, ensure_ascii=False)  # Convert to JSON string
-    return data  # Return the original value if not nested

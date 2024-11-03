@@ -117,6 +117,47 @@ class _MySQLCRUD:
             cursor.close()
             connection.close()
 
+    def call_procedure(self, procedure_name, args=()):
+        """Call a stored procedure."""
+        connection = self.get_connection()
+        if connection is None:
+            return None
+        try:
+            cursor = connection.cursor()
+            cursor.callproc(procedure_name, args)
+            # Fetch the results if the procedure returns data
+            results = []
+            for result in cursor.stored_results():
+                results.append(result.fetchall())
+            print(f"Procedure '{procedure_name}' called successfully.")
+            return results
+        except Error as e:
+            print(f"Failed to call procedure '{procedure_name}': {e}")
+            return None
+        finally:
+            cursor.close()
+            connection.close()
+
+    def execute_sql_file(self, file_path):
+        """Execute SQL commands from a file."""
+        connection = self.get_connection()
+        if connection is None:
+            return
+        try:
+            cursor = connection.cursor()
+            with open(file_path, 'r') as file:
+                sql_script = file.read()
+            for statement in sql_script.split(';'):
+                if statement.strip():
+                    cursor.execute(statement)
+            connection.commit()
+            print(f"SQL file '{file_path}' executed successfully.")
+        except (Error, FileNotFoundError) as e:
+            print(f"Failed to execute SQL file '{file_path}': {e}")
+        finally:
+            cursor.close()
+            connection.close()
+
     def close_pool(self):
         """Close the pool and all connections."""
         try:
@@ -136,6 +177,5 @@ controller_connector = _MySQLCRUD(
     pool_size=CONTROLLER_DB_POOL_SIZE
 )
 
-staging_connector= None
+staging_connector = None
 warehouse_connector = None
-

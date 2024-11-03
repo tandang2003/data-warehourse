@@ -1,5 +1,7 @@
 from abc import abstractmethod
 
+from selenium.common import WebDriverException
+
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.util.validation_util import check_url_valid
 
@@ -38,9 +40,21 @@ class PagingBase(BaseCrawler):
         print(self._list_item)
         self.after_run()
 
-    @abstractmethod
     def crawl_item(self, url):
-        pass
+        try:
+            self.get_url(url)
+
+            print(f"Visiting item: {url}")
+
+            self.wait(10)
+            current_url = self.driver.current_url
+            if current_url != url:
+                return None
+
+            driver = self.driver.page_source
+            self.clean_html(driver)
+        except WebDriverException as e:
+            return None
 
     @abstractmethod
     def crawl_page(self, page):
