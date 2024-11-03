@@ -2,15 +2,16 @@ import re
 from datetime import datetime
 
 from bs4.element import ResultSet
-from selenium.common import WebDriverException
+from selenium.common import WebDriverException, NoSuchElementException
 
-from src.config.setting import SOURCE_B_BASE, SOURCE_B_3
+from src.config.setting import SOURCE_B_BASE, SOURCE_B_3, SOURCE_B_1
+from src.service.extract_service.crawler.config_crawler import config_crawler_source_B
 from src.service.extract_service.crawler.paging_base_crawler import PagingBase
 from src.util.file_util import write_json_to_file, write_json_to_csv
 
 
 class SourceB1Crawler(PagingBase):
-    _base_url = SOURCE_B_3
+    _base_url = SOURCE_B_1
     _domain = SOURCE_B_BASE
 
     def crawl_page(self, page):
@@ -21,7 +22,7 @@ class SourceB1Crawler(PagingBase):
         # Wait for 5 seconds
         self.wait(5)
         driver = self.driver.page_source
-        self.filter_script(driver)
+        self.clean_html(driver)
 
         estate_list = self.soup.select(".sc-q9qagu-4.iZrvBN")
         list_url = []
@@ -31,42 +32,16 @@ class SourceB1Crawler(PagingBase):
         return list_url
 
     def crawl_item(self, url):
-        try:
-            self.get_url(url)
-        except WebDriverException as e:
-            return None
-        print(f"Visiting item: {url}")
+        super().crawl_item(url)
+        result = {}
 
-        self.wait(10)
-        current_url = self.driver.current_url
-        if current_url != url:
-            return None
+        for field_name, properties in config_crawler_source_B.items():
+            print(f"Field Name: {field_name}")
+            print(f"Properties: {properties}")
+            result[field_name] = self.find_element_by_config(properties)
 
-        # self._click_show_phone()
-        driver = self.driver.page_source
-
-        self.filter_script(driver)
-        agent = self.__extract_user()
-
-        create_and_id = self.soup.select_one(".sc-6orc5o-15.jiDXp div.date").get_text()
-        title = self.soup.select_one(".sc-6orc5o-15.jiDXp h1").get_text(strip=True)
-        address = self.soup.select_one(".sc-6orc5o-15.jiDXp div.address").get_text(strip=True)
-        created_at = datetime.now().strftime("%H:%M %d:%m:%Y")
-        natural_id = self._extract_post_id(create_and_id)
-        description = self.soup.select_one("div.sc-6orc5o-18.gdAVnx").get_text(strip=True)
-
-        result = {
-            "Subject": title,
-            "Address": address,
-            "Description": description,
-            "natural_id": natural_id,
-            "created_at": created_at,
-            "src": current_url,
-            "agent": agent,
-            "images": self.__extract_imgs(),
-            "properties": self.__extract_properties()
-        }
         return result
+
     def __extract_imgs(self):
         tag_img = self.soup.select(".sc-6orc5o-3.ljaVcC img")
         result = []
@@ -94,12 +69,6 @@ class SourceB1Crawler(PagingBase):
                 "name": self.soup.select_one("span.title").get_text(strip=True)
                 }
 
-        # def _click_show_phone(self):
-        #     self.driver.find_element(by=By.CLASS_NAME, value="show-phone").click()
-        #     self.wait(3)
-        #     self.driver.find_element(by=By.CLASS_NAME, value="sc-lohvv8-18 sc-lohvv8-19 kgVSjR iuojYw").click()
-        #     self.wait(3)
-
     def _extract_created_at(self, text):
         created_at_pattern = r"Ngày đăng:\s*([^\-]+)"
         created_at_match = re.search(created_at_pattern, text)
@@ -108,6 +77,7 @@ class SourceB1Crawler(PagingBase):
         return None
 
         # Function to extract the post ID
+
     def _extract_post_id(self, text):
         id_pattern = r"Mã tin:\s*(\d+)"
         id_match = re.search(id_pattern, text)
@@ -126,3 +96,44 @@ class SourceB1Crawler(PagingBase):
 
     def handle_error_item(self, error):
         super().handle_error_item(error)
+
+    def find_elements_with_xpath(self, xpath):
+        try:
+            # Attempt to find elements using the provided XPath
+            elements = self.etree.xpath(xpath)
+
+            if not elements:
+                print("No elements found with the specified XPath.")
+
+            return elements  # Return found elements (can be an empty list if none found)
+
+        except NoSuchElementException:
+            print("Element not found using the provided XPath.")
+            return []  # Return an empty list on exception
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return []  # Return an empty list on other exceptions
+
+    def find_element_by_config(self, field_properties):
+        print(field_properties)
+        method = field_properties.get("method", None)
+        selector = field_properties.get("selector", None)
+        attribute = field_properties.get("attribute", None)
+        quantity = field_properties.get("quantity", 0)
+        xpath = self.find_elements_with_xpath(selector)
+
+        if quantity is None:
+            return list(map(lambda img: img.get(attribute), xpath)) if xpath else None
+        quantity -= 1
+        if method == "time":
+            return datetime.now().strftime("%d/%m/%Y")
+        if method == "url":
+            return self.driver.current_url
+        if method == "description":
+            return ''.join(xpath[quantity].itertext()).strip() if xpath else None
+        if method == "get_attribute":
+            return xpath[quantity].get(attribute) if xpath else None
+        if method == "text":
+            return xpath[quantity].text if xpath else None
+        return None

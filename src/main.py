@@ -4,16 +4,8 @@ from src.service.extract_service.crawler.source_B_1_crawler import SourceB1Crawl
 
 
 def run_crawlers():
-    run_crawler_source_A_1()
-    # run_crawler_source_B_1()
-    # Initialize Source1Crawler
-    # source1_crawler = Source1Crawler()
-    # source1_crawler.setup_driver(headless=True)  # Headless browser option
-    # # source1_crawler.setJwt()
-    # data = source1_crawler.crawl()
-    # # current_date = datetime.now().strftime("%H_%M__%d_%m_%Y")
-    # # filename = f"source_1_{current_date}.csv"
-    # # write_json_to_csv(filename, data)
+    # run_crawler_source_A_1()
+    run_crawler_source_B_1()
 
 
 def run_crawler_source_A_1():
