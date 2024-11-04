@@ -1,1 +1,4 @@
 procedure_get_config = "GetConfigById"
+procedure_get_database_config = "get_database_config"
+procedure_get_database_config_by_name = "get_database_config_by_name"
+procedure_get_log_crawler_config ="get_log_crawler_config"
