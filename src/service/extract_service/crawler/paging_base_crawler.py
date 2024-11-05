@@ -27,7 +27,8 @@ class PagingBase(BaseCrawler):
         self._list_url = []
         # Chứa danh sách item đã cào được
         self._list_item = []
-
+    # TODO trả về 1 dict vs  _file_name VARCHAR(200), _error_file_name VARCHAR(200), _count_row INT,
+    #                                     _status VARCHAR(200),
     def handle(self):
         super().setup_driver(headless=True)
         self.before_run()
