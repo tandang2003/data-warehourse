@@ -21,8 +21,6 @@ SOURCE_B_BASE = os.getenv("SOURCE_B_BASE")
 SOURCE_B_1 = os.getenv("SOURCE_B_1")
 SOURCE_B_2 = os.getenv("SOURCE_B_2")
 SOURCE_B_3 = os.getenv("SOURCE_B_3")
-LIMIT_ITEM = int(os.getenv("LIMIT_ITEM"))
-LIMIT_PAGE = int(os.getenv("LIMIT_PAGE"))
 
 CONTROLLER_DB_NAME = os.getenv("CONTROLLER_DB_NAME")
 CONTROLLER_DB_HOST = os.getenv("CONTROLLER_DB_HOST")
