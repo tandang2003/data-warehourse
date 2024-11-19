@@ -51,6 +51,7 @@ class MySQLCRUD:
             # 2.1 trả connection nhận được từ pool
             return connection
         except Error as e:
+            return None
             # 2.2.gửi một email báo lỗi với email mặc định được lưu trên server
             # TODO send mail
 
@@ -62,7 +63,7 @@ class MySQLCRUD:
         cursor.callproc(procedure_get_database_config, ("staging",))
         for rows in cursor.stored_results():
             for row in rows.fetchall():
-                #3.Tạo connection tới warehouse database với các thông tin trả về từ procedure
+                # 3.Tạo connection tới warehouse database với các thông tin trả về từ procedure
                 self.__staging_pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name=CONTROLLER_DB_POOL_NAME,
                     pool_size=CONTROLLER_DB_POOL_SIZE,
@@ -88,6 +89,7 @@ class MySQLCRUD:
             # 2.1 trả  connection nhận được từ pool
             return connection
         except Error as e:
+            return None
             # 2.2.gửi một email báo lỗi với email mặc định được lưu trên server
             # TODO send mail
 
@@ -99,7 +101,7 @@ class MySQLCRUD:
         cursor.callproc("get_database_config", ("warehouse",))
         for result in cursor.stored_results():
             for row in result.fetchall():
-                #3.Tạo connection tới warehouse database với các thông tin trả về từ procedure
+                # 3.Tạo connection tới warehouse database với các thông tin trả về từ procedure
                 self.__warehouse_pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name=CONTROLLER_DB_POOL_NAME,
                     pool_size=CONTROLLER_DB_POOL_SIZE,
@@ -114,21 +116,35 @@ class MySQLCRUD:
         cursor.close()
 
     def call_procedure(self, procedure_name: str, connection: mysql.connector.connection.MySQLConnection, args=()):
-        """Call a stored procedure."""
+        # 1 Kiển tra connection có được truyền vào hay không
         if connection is None:
+            # 1.2 không được truyền
             return None
+        # 1.1 Được truyền
+        cursor = connection.cursor(dictionary=True)
+        # 3. Kiểm tra trong quá trình gọi procedure có lỗi xảy ra không
         try:
-            cursor = connection.cursor(dictionary=True)
+            # 2 thực hiện gọi procedure với tên và tham số được nhận vào
             cursor.callproc(procedure_name, args)
-            # Fetch the results if the procedure returns data
             results = []
             for result in cursor.stored_results():
                 for row in result.fetchall():
+                    # 3.2 Lưu các kết quả nhận về vào 1 danh sách dictionary
                     results.append(row)
             print(f"Procedure '{procedure_name}' called successfully.")
+            # 4 Kiểm tra trong dictionary trả về
+            # dictionary bị rỗng
+            # 4.1 trả về None
+            # dictionary không rỗng
+            #  4.2 Kiểm tra trong dictionary trả về
+            # nếu dài hơn 1
+            # 5.1 trả về dictionary
+            # dictionary không rỗng
+            # 5.2 trả về giá trị đầu tiên
             return len(results) > 1 and results or results[0] if results else None
         except Error as e:
-            print(f"Failed to call procedure '{procedure_name}': {e}")
+            # 3.1 Gửi mail thông báo việc gọi procedure lỗi
+            #  TODO send mail
             return None
         finally:
             cursor.close()
