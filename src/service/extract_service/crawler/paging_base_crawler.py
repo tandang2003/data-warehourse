@@ -10,23 +10,36 @@ from src.util.validation_util import check_url_valid
 
 class PagingBase(BaseCrawler):
 
-    def __init__(self, limit_page, format_file, extension, prefix,dir_path,purpose, base_url,source_page, paging_pattern, scenario):
+    def __init__(self,
+                 limit_page,
+                 format_file,
+                 extension,
+                 prefix,
+                 dir_path,
+                 purpose,
+                 base_url,
+                 source_page,
+                 paging_pattern,
+                 scenario,
+                 navigate_scenario):
         super().__init__()
-        self._scenario = json.loads(scenario)
-        self._limit_page=limit_page
-        self._format_file=format_file
-        self._extension=extension
-        self._prefix=prefix
-        self._dir_path=dir_path
-        self._purpose=purpose
-        self._base_url=base_url
-        self._source_page=source_page
-        self._paging_pattern= paging_pattern
+        self._limit_page = limit_page
+        self._format_file = format_file
+        self._extension = extension
+        self._prefix = prefix
+        self._dir_path = dir_path
+        self._purpose = purpose
+        self._base_url = base_url
+        self._source_page = source_page
+        self._paging_pattern = paging_pattern
         self._current_page = 1
+        self._scenario = json.loads(scenario)
+        self._navigate_scenario = json.loads(navigate_scenario)
         # # Chứa danh sách url item
         self._list_url = []
         # Chứa danh sách item đã cào được
         self._list_item = []
+
     # TODO trả về 1 dict vs  _file_name VARCHAR(200), _error_file_name VARCHAR(200), _count_row INT,
     #                                     _status VARCHAR(200),
     def handle(self):
@@ -68,17 +81,32 @@ class PagingBase(BaseCrawler):
             result = {}
 
             for field_name, properties in scenario.items():
-                print(f"Field Name: {field_name}")  # Print the name of the field
-                print(f"Properties: {properties}")  # Print the properties of the field
+                print(f"Field Name: {field_name}")
+                print(f"Properties: {properties}")
                 result[field_name] = self.find_element_by_config(properties)
 
             return result
         except WebDriverException as e:
             return None
 
-    # @abstractmethod
     def crawl_page(self, page):
-        pass
+        url_page = f"{self._base_url}/p{page}"
+        print(f"Visiting page: {url_page}")
+        self.get_url(url_page)
+
+        self.wait(5)
+        driver = self.driver.page_source
+        self.clean_html(driver)
+
+        estate_list = self.soup.select(self._navigate_scenario["link"])
+        list_url = []
+        for (estate) in estate_list:
+            link = estate.select_one(self._navigate_scenario["item"]).get("href")
+            if link.startswith("https://"):
+                continue
+            else:
+                list_url.append(f"{self._base_url}{str(link)}")
+        return list_url
 
     def before_run(self):
         pass
@@ -120,18 +148,16 @@ class PagingBase(BaseCrawler):
 
     def find_elements_with_xpath(self, xpath):
         try:
-            # Attempt to find elements using the provided XPath
             elements = self.etree.xpath(xpath)
 
             if not elements:
                 print("No elements found with the specified XPath.")
-
-            return elements  # Return found elements (can be an empty list if none found)
+            return elements
 
         except NoSuchElementException:
             print("Element not found using the provided XPath.")
-            return []  # Return an empty list on exception
+            return []
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-            return []  # Return an empty list on other exceptions
+            return []

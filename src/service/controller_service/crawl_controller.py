@@ -9,14 +9,26 @@ class CrawlController(Controller):
 
     def get_config(self):
         data = self.call_controller_procedure(get_log_crawler, ())
-        crawl = PagingBase(limit_page=data['limit_page'], format_file=data['format_file'], extension=data['extension'],
-                           prefix=data['prefix'], dir_path=data['dir_path'], purpose=data['purpose'],
-                           base_url=data['base_url'], source_page=data['source_page'],
-                           paging_pattern=data['paging_pattern'], scenario=data['scenario'])
+        if data is None:
+            return
+        crawl = PagingBase(limit_page=data['limit_page'],
+                           format_file=data['format_file'],
+                           extension=data['extension'],
+                           prefix=data['prefix'],
+                           dir_path=data['dir_path'],
+                           purpose=data['purpose'],
+                           base_url=data['base_url'],
+                           source_page=data['source_page'],
+                           paging_pattern=data['paging_pattern'],
+                           scenario=data['scenario'])
         result = crawl.handle()
 
-        self.call_controller_procedure('insert_log_crawler', (data['id'],), result['file'], result['error_file_name'],
-                                       result['count_row'], result['status'])
+        self.call_controller_procedure('insert_log_crawler', (
+            data['id'],
+            result['file'],
+            result['error_file_name'],
+            result['count_row'],
+            result['status']))
 
 
 if __name__ == '__main__':

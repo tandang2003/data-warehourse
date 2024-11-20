@@ -22,17 +22,14 @@ class Controller:
     def call_controller_procedure(self, procedure_name, args):
         connection = self.__connector.get_controller_connection()
         result = self.__connector.call_procedure(procedure_name, connection, args)
-        # connection.close()
         return result
 
     def call_staging_procedure(self, procedure_name, args):
         connection = self.__connector.get_staging_connection()
         result = self.__connector.call_procedure(procedure_name, connection, args)
-        # connection.close()
         return result
 
     def call_warehouse_procedure(self, procedure_name, args, header):
         connection = self.__connector.get_warehouse_connection()
         result = self.__connector.call_procedure(procedure_name, connection, args)
-        # connection.close()
         return result
