@@ -44,7 +44,6 @@ class PagingBase(BaseCrawler):
     #                                     _status VARCHAR(200),
     def handle(self):
         super().setup_driver(headless=True)
-        self.before_run()
 
         for (page) in range(1, 1 + self._limit_page):
             list_url = self.crawl_page(page)
@@ -90,16 +89,22 @@ class PagingBase(BaseCrawler):
             return None
 
     def crawl_page(self, page):
-        url_page = f"{self._base_url}/p{page}"
+        url_page = f"{self._base_url}/{self._source_page}{self._paging_pattern}{page}"
         print(f"Visiting page: {url_page}")
-        self.get_url(url_page)
 
+        # Lấy HTML từ url
+        self.get_url(url_page)
         self.wait(5)
         driver = self.driver.page_source
+
+        # Lọc các tag không sử dụng
         self.clean_html(driver)
 
         estate_list = self.soup.select(self._navigate_scenario["link"])
         list_url = []
+
+        if len(estate_list) == 0:
+            return None
         for (estate) in estate_list:
             link = estate.select_one(self._navigate_scenario["item"]).get("href")
             if link.startswith("https://"):
