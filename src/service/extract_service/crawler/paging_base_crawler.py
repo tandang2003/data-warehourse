@@ -44,7 +44,7 @@ class PagingBase(BaseCrawler):
 
     # TODO trả về 1 dict vs  _file_name VARCHAR(200), _error_file_name VARCHAR(200), _count_row INT,
     #                                     _status VARCHAR(200),
-    def handle(self):
+    def handle(self)->dict:
         super().setup_driver(headless=True)
 
         for (page) in range(1, 1 + self._limit_page):
