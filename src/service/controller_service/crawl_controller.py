@@ -13,14 +13,16 @@ class CrawlController(Controller):
             return
         crawl = PagingBase(limit_page=data['limit_page'],
                            format_file=data['format_file'],
-                           extension=data['extension'],
+                           extension=data['file_extension'],
                            prefix=data['prefix'],
-                           dir_path=data['dir_path'],
+                           data_dir_path=data['data_dir_path'],
+                           error_dir_path=data['error_dir_path'],
                            purpose=data['purpose'],
                            base_url=data['base_url'],
                            source_page=data['source_page'],
                            paging_pattern=data['paging_pattern'],
-                           scenario=data['scenario'])
+                           scenario=data['scenario'],
+                           navigate_scenario=data['navigate_scenario'])
         result = crawl.handle()
 
         self.call_controller_procedure('insert_log_crawler', (

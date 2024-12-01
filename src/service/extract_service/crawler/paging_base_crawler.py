@@ -1,7 +1,7 @@
 import json
-from abc import abstractmethod
+import re
 from datetime import datetime
-
+from lxml import html
 from selenium.common import WebDriverException, NoSuchElementException
 
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
@@ -15,7 +15,8 @@ class PagingBase(BaseCrawler):
                  format_file,
                  extension,
                  prefix,
-                 dir_path,
+                 data_dir_path,
+                 error_dir_path,
                  purpose,
                  base_url,
                  source_page,
@@ -27,7 +28,8 @@ class PagingBase(BaseCrawler):
         self._format_file = format_file
         self._extension = extension
         self._prefix = prefix
-        self._dir_path = dir_path
+        self._data_dir_path = data_dir_path
+        self._error_dir_path = error_dir_path
         self._purpose = purpose
         self._base_url = base_url
         self._source_page = source_page
@@ -66,6 +68,7 @@ class PagingBase(BaseCrawler):
 
     def crawl_item(self, url, scenario):
         try:
+            # gọi request đến url chi tiết bất động sản
             self.get_url(url)
 
             print(f"Visiting item: {url}")
@@ -76,6 +79,8 @@ class PagingBase(BaseCrawler):
                 return None
 
             driver = self.driver.page_source
+
+            # Xóa các thẻ không cần thiết
             self.clean_html(driver)
             result = {}
 
@@ -100,7 +105,7 @@ class PagingBase(BaseCrawler):
         # Lọc các tag không sử dụng
         self.clean_html(driver)
 
-        estate_list = self.soup.select(self._navigate_scenario["link"])
+        estate_list = self.soup.select(self._navigate_scenario["list"])
         list_url = []
 
         if len(estate_list) == 0:
@@ -134,22 +139,29 @@ class PagingBase(BaseCrawler):
         selector = field_properties.get("selector", None)
         attribute = field_properties.get("attribute", None)
         quantity = field_properties.get("quantity", 0)
-        xpath = self.find_elements_with_xpath(selector)
+        regex = field_properties.get("regex", None)
+        _xpath = self.find_elements_with_xpath(selector)
 
-        if quantity is None:
-            return list(map(lambda img: img.get(attribute), xpath)) if xpath else None
-        quantity -= 1
-        if method == "time":
-            return datetime.now().strftime("%d/%m/%Y")
-        if method == "url":
-            return self.driver.current_url
-        if method == "description":
-            return ''.join(xpath[quantity].itertext()).strip() if xpath else None
-        if method == "get_attribute":
-            return xpath[quantity].get(attribute) if xpath else None
-        if method == "text":
-            return xpath[quantity].text if xpath else None
-        return None
+        try:
+            if regex:
+                return self.find_element_by_regex(_xpath, regex)
+            if quantity is None:
+                return list(map(lambda img: img.get(attribute), xpath)) if xpath else None
+            quantity -= 1
+            if method == "time":
+                return datetime.now().strftime("%d/%m/%Y")
+            if method == "url":
+                return self.driver.current_url
+            if method == "description":
+                return ''.join(xpath[quantity].itertext()).strip() if xpath else None
+            if method == "get_attribute":
+                return xpath[quantity].get(attribute) if xpath else None
+            if method == "text":
+                return xpath[quantity].text if xpath else None
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return None
 
     def find_elements_with_xpath(self, xpath):
         try:
@@ -166,3 +178,33 @@ class PagingBase(BaseCrawler):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return []
+
+    def find_element_by_regex(self, xpath, regex_pattern):
+        id_pattern = fr"{regex_pattern}".replace("\\\\", "\\")
+        text = xpath[0].text_content().strip()
+        print(f'nk{text}')
+        match = re.search(id_pattern, text)
+        if match:
+            return match.group(1)
+        return None
+
+
+if __name__ == '__main__':
+    from lxml import html
+
+    # The provided HTML
+    html_content = """
+   <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,9 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,9 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->69527925</div></div>
+    """
+
+    # Parse the HTML string
+    tree = html.fromstring(html_content)
+
+    # Corrected XPath to select the div with class "date"
+    xpath = tree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
+
+    # Extract and print the text content
+    if xpath:
+        print(xpath[0].text_content().strip())
+    else:
+        print("No matching element found.")
