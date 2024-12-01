@@ -3,6 +3,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.setting import SERVER_HOST, SERVER_PORT
+from src.service.controller_service.crawl_controller import CrawlController
 
 app = FastAPI()
 app.add_middleware(
@@ -25,10 +26,11 @@ def read_item(item_id: int, q: str = None):
 
 
 if __name__ == '__main__':
-    uvicorn.run(
-        "src.main:app",
-        host=SERVER_HOST,
-        port=SERVER_PORT,
-        reload=True
-    )
-
+    # uvicorn.run(
+    #     "src.main:app",
+    #     host=SERVER_HOST,
+    #     port=SERVER_PORT,
+    #     reload=True
+    # )
+    c = CrawlController()
+    c.get_config()
