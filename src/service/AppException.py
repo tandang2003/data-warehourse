@@ -26,15 +26,20 @@ class AppException(Exception):
         self._level = level
         self._file_name = file_name
 
+    # 15
     def handle_exception(self):
+        # 15.1 Kiểm tra level là thuộc level error
         if self._level in LEVEL_ERROR:
             self._handle_save_error_log()
+
+        # 15.2 Kiểm tra message != None
         if self._message:
+            # 15.2.1 Gọi hàm sent mail
             self._handle_sent_email()
 
     def _handle_save_error_log(self):
         stack_trace = traceback.format_exc()
-        # Cấu hình logging
+        # 15.1.1 Cấu hình logging
         logging.basicConfig(
             level=logging.ERROR,
             format="%(asctime)s - %(levelname)s - %(message)s",
@@ -45,7 +50,8 @@ class AppException(Exception):
         )
         # In lỗi ra console
         logging.error(f"{self._message}\nStack trace:\n{stack_trace}")
-        # In lõi ra file
+
+        # 15.1.2 lưu stack trace vào file
         logging.error(f"Error log saved {self._file_name}", exc_info=True)
 
     def _handle_sent_email(self):
@@ -64,6 +70,3 @@ class AppException(Exception):
         self._file_name = file_name
 
 
-def handle_app_exception(e: AppException, filename: str):
-    e.file_error = filename
-    e.handle_exception()

@@ -40,7 +40,7 @@ class PagingBase(BaseCrawler):
         self._paging_pattern = paging_pattern
         self._scenario = json.loads(scenario)
         self._navigate_scenario = json.loads(navigate_scenario)
-        # # Chứa danh sách url item
+        # Chứa danh sách url item
         self._list_url = []
         # Chứa danh sách item đã cào được
         self._list_item = []
@@ -51,7 +51,7 @@ class PagingBase(BaseCrawler):
         super().setup_driver(headless=True)
         try:
             for (page) in range(1, 1 + self._limit_page):
-                # 7.2. Thực hiện gọi hàm crawl_page (9) để lấy danh sách các url item trong trang
+                # 7.2. Thực hiện gọi hàm crawl_page (12) để lấy danh sách các url item trong trang
                 list_url = self.crawl_page(page)
                 # 7.3. Lấy 1 url item từ trong danh sách các item có trong trang
                 for (url) in list_url:
@@ -72,66 +72,91 @@ class PagingBase(BaseCrawler):
             # 7.8 Gọi hàm handle_exception() để xử lý lỗi
             return self.handle_exception(e)
 
+    # 13
     def crawl_item(self, url, scenario):
         try:
-            # gọi request đến url chi tiết bất động sản
+            # 13.1 gọi request đến url chi tiết bất động sản
             self.get_url(url)
 
             logging.info(f"Visiting item: {url}")
 
             self.wait(10)
             current_url = self.driver.current_url
-            if current_url != url:
-                return None
 
+            # 13.2
+            if current_url != url:
+                # 13.2.1 no -> trang bị chuyển hướng
+                return None
+            # 13.2.2 hợp lệ
             driver = self.driver.page_source
 
-            # Xóa các thẻ không cần thiết
+            # 13.3 Xóa các thẻ không cần thiết
             self.clean_html(driver)
             result = {}
 
+            # 13.4 Loop qua các thuộc tính trong scenario
             for field_name, properties in scenario.items():
+                # 13.5 gọi hàm find_element_by_config (9)
                 result[field_name] = self.find_element_by_config(properties)
-
+            # 13.6 Trả về dữ liệu đã trích xuất
             return result
         except WebDriverException as e:
             return None
 
+    # 12
     def crawl_page(self, page):
+        # 12.1 tạo url để navigate đến trang danh sách bất động sản
         url_page = f"{self._base_url}/{self._source_page}{self._paging_pattern}{page}"
-        print(f"Visiting page: {url_page}")
+        logging.info(f"Visiting page: {url_page}")
 
-        # Lấy HTML từ url
+        # 12.2 Lấy HTML từ url
         self.get_url(url_page)
         self.wait(5)
         driver = self.driver.page_source
 
-        # Lọc các tag không sử dụng
+        # 12.3 Lọc các tag không sử dụng
         self.clean_html(driver)
 
+        # 12.4 Lấy danh sách các url đến trang chi tiết
         estate_list = self.soup.select(self._navigate_scenario["list"])
-        list_url = []
 
+
+        # 12.5 Kiểm tra list_url != None
         if len(estate_list) == 0:
+            # 12.6 Ném ra ngoại lệ AppException => Crawl page không thành công
             raise AppException(LEVEL.FILE_ERROR, "No data found")
+
+        # 12.6 Tạo result = [] chứa các url đến trang chi tiết
+        result = []
+
+        # 12.7 Lấy ra từng url trong list_url
         for (estate) in estate_list:
             link = estate.select_one(self._navigate_scenario["item"]).get("href")
+            # 12.8 kiểm tra url hợp lệ
             if link.startswith("https://"):
+                # 12.8.1 Thêm list_url
                 continue
             else:
-                list_url.append(f"{self._base_url}{str(link)}")
-        return list_url
+                # 12.8.2 Thêm list_url
+                result.append(f"{self._base_url}{str(link)}")
+        return result
 
     def before_run(self):
         pass
 
+    # 10
     def handle_success(self):
         data = self._list_item
+        # 10.1 lấy ra thời gian hiện tại
         current_date = datetime.now().strftime(self._format_file)
+        # 10.2 tạo tên file
         filename = f"{self._prefix}{current_date}.{self._extension}"
+        # 10.3  Tạo đường dẫn đến file lưu dữ liệu, từ đường dẫn thư mục và tên file được tạo
         path = os.path.join(self._data_dir_path, filename)
+        # 10.4 lưu dữ liệu vào file sử dụng hàm write_json_to_csv
         write_json_to_csv(path, data)
         logging.info(f"Data has been saved to {path}")
+        # 10.5 trả về đường dẫn đến file, số lượng dòng thu thập được,trạng thái "STAGING_PENDING" và đường dẫn file lỗi là None
         return {
             'file': path,
             'count_row': len(data),
@@ -139,10 +164,16 @@ class PagingBase(BaseCrawler):
             'error_file_name': None
         }
 
+    # 11 Xử lý ngoại lệ
     def handle_exception(self, exception: AppException):
+        # 11.1 Tạo file name error
         filename = f"{self._prefix}{self._format_file}.log"
         path = os.path.join(self._error_dir_path, filename)
-        handle_app_exception(exception, path)
+        # 11.2 cài đặt file name error vào exception
+        exception.file_error = filename
+        # 11.3 gọi hàm handler_exception trong exception (15)
+        exception.handle_exception()
+        # 11.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,
             'error_file_name': path,
@@ -152,6 +183,7 @@ class PagingBase(BaseCrawler):
 
     def find_element_by_config(self, field_properties):
         # print(field_properties)
+        # 9.1 Khởi tạo các biến, trích xuất config field vào các biến
         method = field_properties.get("method", None)
         selector = field_properties.get("selector", None)
         attribute = field_properties.get("attribute", None)
@@ -160,21 +192,36 @@ class PagingBase(BaseCrawler):
         xpath = self.find_elements_with_xpath(selector)
 
         try:
+            #9.2 regex != None
             if regex:
+                # 9.2.1 gọi hàm find_element_by_regex (14)
                 return self.find_element_by_regex(xpath, regex)
+            # 9.3 quantity != None
             if quantity is None:
+                # 9.3.1 trả về danh sách json ảnh
                 return list(map(lambda img: img.get(attribute), xpath)) if xpath else None
             quantity -= 1
+            # 9.4 method == time
             if method == "time":
+                # 9.4.1 trả về thời gian hiện tại
                 return datetime.now().strftime("%d/%m/%Y")
+                # 9.5 method = url
             if method == "url":
+                # 9.5.1 trả về url hiện tại của trang
                 return self.driver.current_url
+            # 9.6 method = description
             if method == "description":
+                # 9.6.1 trả về text content
                 return ''.join(xpath[quantity].itertext()).strip() if xpath else None
+            # 9.7 method = get_attribute
             if method == "get_attribute":
+                # 9.7.1 trích xuất attribute từ thẻ
                 return xpath[quantity].get(attribute) if xpath else None
+            # 9.8 method = text
             if method == "text":
+                # 9.8.1 lấy ra text của thẻ
                 return xpath[quantity].text if xpath else None
+            # 9.8 trả về None
             return None
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -197,9 +244,12 @@ class PagingBase(BaseCrawler):
             return []
 
     def find_element_by_regex(self, xpath, regex_pattern):
+        # 14.1 Biến đổi dấu (\\ -> \)
+        # 14.2 Tạo regex xpath từ regex pattern
         id_pattern = fr"{regex_pattern}".replace("\\\\", "\\")
+        # 14.3 Trích xuất text từ xpath
         text = xpath[0].text_content().strip()
-        print(f'nk{text}')
+        # 14.4 Áp dụng regex trong text
         match = re.search(id_pattern, text)
         if match:
             return match.group(1)
@@ -210,7 +260,7 @@ class PagingBase(BaseCrawler):
 #
 #     # The provided HTML
 #     html_content = """
-#    <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,9 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,9 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->69527925</div></div>
+#    <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,12 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,12 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->6125271225</div></div>
 #     """
 #
 #     # Parse the HTML string
