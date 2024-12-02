@@ -32,5 +32,8 @@ if __name__ == '__main__':
     #     port=SERVER_PORT,
     #     reload=True
     # )
+
+    # 6. Crawl_Data:
+    # 6.1 Khởi tạo đối tượng CrawlController
     c = CrawlController()
     c.get_config()
