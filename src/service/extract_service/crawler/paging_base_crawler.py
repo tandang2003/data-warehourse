@@ -1,10 +1,14 @@
 import json
+import logging
+import os.path
 import re
 from datetime import datetime
-from lxml import html
+
 from selenium.common import WebDriverException, NoSuchElementException
 
+from src.service.AppException import AppException, handle_app_exception, LEVEL
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
+from src.util.file_util import write_json_to_csv
 from src.util.validation_util import check_url_valid
 
 
@@ -34,7 +38,6 @@ class PagingBase(BaseCrawler):
         self._base_url = base_url
         self._source_page = source_page
         self._paging_pattern = paging_pattern
-        self._current_page = 1
         self._scenario = json.loads(scenario)
         self._navigate_scenario = json.loads(navigate_scenario)
         # # Chứa danh sách url item
@@ -42,36 +45,32 @@ class PagingBase(BaseCrawler):
         # Chứa danh sách item đã cào được
         self._list_item = []
 
-    # TODO trả về 1 dict vs  _file_name VARCHAR(200), _error_file_name VARCHAR(200), _count_row INT,
-    #                                     _status VARCHAR(200),
-    def handle(self)->dict:
+    # 7
+    def handle(self) -> dict:
+        #7.1 Thực hiện tạo cấu hình crawler(selenium) bằng hàm setup_driver (8)
         super().setup_driver(headless=True)
-
-        for (page) in range(1, 1 + self._limit_page):
-            list_url = self.crawl_page(page)
-            list_item_each_page = []
-            for (url) in list_url:
-                try:
+        try:
+            # Kiểm tra số trang cần crawl
+            for (page) in range(1, 1 + self._limit_page):
+                list_url = self.crawl_page(page)
+                #7.2. Kiểm tra đã thực hiện crawl đủ số trang yêu cầu không
+                for (url) in list_url:
                     if not check_url_valid(url):
-                        raise NameError
+                        break
                     item_crawled = self.crawl_item(url, self._scenario)
                     print(item_crawled)
                     self._list_item.append(item_crawled)
-                    self.after_run_each_item(item_crawled)
-                except NameError:
-                    self.handle_error_item(NameError)
-            self.after_run_each_page(list_item_each_page)
-            list_item_each_page.clear()
-            self._current_page += 1
-        print(self._list_item)
-        self.after_run()
+            logging.info(self._list_item)
+            return self.handle_success()
+        except AppException as e:
+            return self.handle_exception(e)
 
     def crawl_item(self, url, scenario):
         try:
             # gọi request đến url chi tiết bất động sản
             self.get_url(url)
 
-            print(f"Visiting item: {url}")
+            logging.info(f"Visiting item: {url}")
 
             self.wait(10)
             current_url = self.driver.current_url
@@ -85,8 +84,8 @@ class PagingBase(BaseCrawler):
             result = {}
 
             for field_name, properties in scenario.items():
-                print(f"Field Name: {field_name}")
-                print(f"Properties: {properties}")
+                # print(f"Field Name: {field_name}")
+                # print(f"Properties: {properties}")
                 result[field_name] = self.find_element_by_config(properties)
 
             return result
@@ -109,7 +108,7 @@ class PagingBase(BaseCrawler):
         list_url = []
 
         if len(estate_list) == 0:
-            return None
+            raise AppException(LEVEL.FILE_ERROR, "No data found")
         for (estate) in estate_list:
             link = estate.select_one(self._navigate_scenario["item"]).get("href")
             if link.startswith("https://"):
@@ -121,30 +120,44 @@ class PagingBase(BaseCrawler):
     def before_run(self):
         pass
 
-    def after_run(self):
-        pass
+    def handle_success(self):
+        data = self._list_item
+        current_date = datetime.now().strftime(self._format_file)
+        filename = f"{self._prefix}{current_date}.{self._extension}"
+        path = os.path.join(self._data_dir_path, filename)
+        write_json_to_csv(path, data)
+        logging.info(f"Data has been saved to {path}")
+        return {
+            'file': path,
+            'count_row': len(data),
+            'status': 'STAGING_PENDING',
+            'error_file_name': None
+        }
 
-    def after_run_each_page(self, list_item):
-        pass
+    def handle_exception(self, exception: AppException):
+        filename = f"{self._prefix}{self._format_file}.log"
+        path = os.path.join(self._error_dir_path, filename)
+        handle_app_exception(exception, path)
+        return {
+            'file': None,
+            'error_file_name': path,
+            'count_row': 0,
+            'status': 'STAGING_ERROR'
+        }
 
-    def after_run_each_item(self, item):
-        pass
-
-    def handle_error_item(self, error):
-        pass
 
     def find_element_by_config(self, field_properties):
-        print(field_properties)
+        # print(field_properties)
         method = field_properties.get("method", None)
         selector = field_properties.get("selector", None)
         attribute = field_properties.get("attribute", None)
         quantity = field_properties.get("quantity", 0)
         regex = field_properties.get("regex", None)
-        _xpath = self.find_elements_with_xpath(selector)
+        xpath = self.find_elements_with_xpath(selector)
 
         try:
             if regex:
-                return self.find_element_by_regex(_xpath, regex)
+                return self.find_element_by_regex(xpath, regex)
             if quantity is None:
                 return list(map(lambda img: img.get(attribute), xpath)) if xpath else None
             quantity -= 1
@@ -163,6 +176,7 @@ class PagingBase(BaseCrawler):
             print(f"An unexpected error occurred: {e}")
             return None
 
+
     def find_elements_with_xpath(self, xpath):
         try:
             elements = self.etree.xpath(xpath)
@@ -179,6 +193,7 @@ class PagingBase(BaseCrawler):
             print(f"An unexpected error occurred: {e}")
             return []
 
+
     def find_element_by_regex(self, xpath, regex_pattern):
         id_pattern = fr"{regex_pattern}".replace("\\\\", "\\")
         text = xpath[0].text_content().strip()
@@ -189,22 +204,22 @@ class PagingBase(BaseCrawler):
         return None
 
 
-if __name__ == '__main__':
-    from lxml import html
-
-    # The provided HTML
-    html_content = """
-   <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,9 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,9 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->69527925</div></div>
-    """
-
-    # Parse the HTML string
-    tree = html.fromstring(html_content)
-
-    # Corrected XPath to select the div with class "date"
-    xpath = tree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
-
-    # Extract and print the text content
-    if xpath:
-        print(xpath[0].text_content().strip())
-    else:
-        print("No matching element found.")
+# if __name__ == '__main__':
+#     from lxml import html
+#
+#     # The provided HTML
+#     html_content = """
+#    <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,9 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,9 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->69527925</div></div>
+#     """
+#
+#     # Parse the HTML string
+#     tree = html.fromstring(html_content)
+#
+#     # Corrected XPath to select the div with class "date"
+#     xpath = tree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
+#
+#     # Extract and print the text content
+#     if xpath:
+#         print(xpath[0].text_content().strip())
+#     else:
+#         print("No matching element found.")
