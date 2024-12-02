@@ -47,22 +47,29 @@ class PagingBase(BaseCrawler):
 
     # 7
     def handle(self) -> dict:
-        #7.1 Thực hiện tạo cấu hình crawler(selenium) bằng hàm setup_driver (8)
+        # 7.1 Thực hiện tạo cấu hình crawler(selenium) bằng hàm setup_driver (8)
         super().setup_driver(headless=True)
         try:
-            # Kiểm tra số trang cần crawl
             for (page) in range(1, 1 + self._limit_page):
+                # 7.2. Thực hiện gọi hàm crawl_page (9) để lấy danh sách các url item trong trang
                 list_url = self.crawl_page(page)
-                #7.2. Kiểm tra đã thực hiện crawl đủ số trang yêu cầu không
+                # 7.3. Lấy 1 url item từ trong danh sách các item có trong trang
                 for (url) in list_url:
+                    # 7.4 Kiểm tra url có hợp lệ không
                     if not check_url_valid(url):
+                        # 7.4.1 Không hợp lệ
                         break
+                    # 7.4.2 Hợp lệ
+                    # 7.5.thực hiện gọi hàm crawl_item để lấy các thông tin của item
                     item_crawled = self.crawl_item(url, self._scenario)
                     print(item_crawled)
+                    # 7.6.Thêm các thông tin lấy được vào danh sách
                     self._list_item.append(item_crawled)
             logging.info(self._list_item)
+            # 7.7 gọi hàm handle_success() đễ xử lý thành công
             return self.handle_success()
         except AppException as e:
+            # 7.8 Gọi hàm handle_exception() để xử lý lỗi
             return self.handle_exception(e)
 
     def crawl_item(self, url, scenario):
@@ -84,8 +91,6 @@ class PagingBase(BaseCrawler):
             result = {}
 
             for field_name, properties in scenario.items():
-                # print(f"Field Name: {field_name}")
-                # print(f"Properties: {properties}")
                 result[field_name] = self.find_element_by_config(properties)
 
             return result
@@ -145,7 +150,6 @@ class PagingBase(BaseCrawler):
             'status': 'STAGING_ERROR'
         }
 
-
     def find_element_by_config(self, field_properties):
         # print(field_properties)
         method = field_properties.get("method", None)
@@ -176,7 +180,6 @@ class PagingBase(BaseCrawler):
             print(f"An unexpected error occurred: {e}")
             return None
 
-
     def find_elements_with_xpath(self, xpath):
         try:
             elements = self.etree.xpath(xpath)
@@ -193,7 +196,6 @@ class PagingBase(BaseCrawler):
             print(f"An unexpected error occurred: {e}")
             return []
 
-
     def find_element_by_regex(self, xpath, regex_pattern):
         id_pattern = fr"{regex_pattern}".replace("\\\\", "\\")
         text = xpath[0].text_content().strip()
@@ -202,7 +204,6 @@ class PagingBase(BaseCrawler):
         if match:
             return match.group(1)
         return None
-
 
 # if __name__ == '__main__':
 #     from lxml import html
