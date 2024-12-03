@@ -6,7 +6,7 @@ from datetime import datetime
 
 from selenium.common import WebDriverException, NoSuchElementException
 
-from src.service.AppException import AppException, handle_app_exception, LEVEL
+from src.service.AppException import AppException, LEVEL
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.util.file_util import write_json_to_csv
 from src.util.validation_util import check_url_valid
