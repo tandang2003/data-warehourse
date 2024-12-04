@@ -35,6 +35,5 @@ async def sent_mail(message: str, type: EmailCategory):
     except Exception as e:
         print(f"Error: {e}")
 
-
 if __name__ == '__main__':
     asyncio.run(sent_mail("Hello, World!", EmailCategory.INFO))

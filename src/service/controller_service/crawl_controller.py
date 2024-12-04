@@ -13,7 +13,7 @@ class CrawlController(Controller):
         data = self.call_controller_procedure(get_log_crawler, ())
 
         # 6.3 Kiểm tra các thông ố lấy về data != None
-        if data is None:
+        if data is None :
             # 6.3.1 Không lấy được cấu hình
             return
 
@@ -21,7 +21,7 @@ class CrawlController(Controller):
         # 6.4 Khởi tạo đối tượng PagingBase với các thông số lấy về từ database
         print(data)
         crawl = PagingBase(limit_page=data['limit_page'],
-                           file_format=data['file_format'],
+                           format_file=data['file_format'],
                            extension=data['file_extension'],
                            prefix=data['prefix'],
                            data_dir_path=data['data_dir_path'],
