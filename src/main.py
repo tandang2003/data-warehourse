@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from src.config.setting import SERVER_HOST, SERVER_PORT

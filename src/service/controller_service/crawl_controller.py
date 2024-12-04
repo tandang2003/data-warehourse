@@ -1,5 +1,6 @@
 from src.config.procedure import get_log_crawler
 from src.service.controller_service.database_controller import Controller
+from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.service.extract_service.crawler.paging_base_crawler import PagingBase
 
 
