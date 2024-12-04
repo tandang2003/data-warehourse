@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config.setting import SERVER_HOST, SERVER_PORT
 from src.service.controller_service.crawl_controller import CrawlController
 
 app = FastAPI()
