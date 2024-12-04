@@ -1,5 +1,6 @@
 from src.config.procedure import get_log_crawler
 from src.service.controller_service.database_controller import Controller
+from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.service.extract_service.crawler.paging_base_crawler import PagingBase
 
 
@@ -20,7 +21,7 @@ class CrawlController(Controller):
         # 6.4 Khởi tạo đối tượng PagingBase với các thông số lấy về từ database
         print(data)
         crawl = PagingBase(limit_page=data['limit_page'],
-                           format_file=data['format_file'],
+                           file_format=data['file_format'],
                            extension=data['file_extension'],
                            prefix=data['prefix'],
                            data_dir_path=data['data_dir_path'],
@@ -45,5 +46,11 @@ class CrawlController(Controller):
 
 
 if __name__ == '__main__':
-    c = CrawlController()
-    c.get_config()
+    crawler = BaseCrawler()
+    crawler.setup_driver()
+    crawler.get_url('https://muaban.net/bat-dong-san/ban-nha-mat-tien-huyen-binh-chanh-ho-chi-minh/so-hong-rieng-gan-cho-binh-dien-id0-id69546466')
+    crawler.wait(5)
+    page_source = crawler.driver.page_source
+    crawler.clean_html(page_source)
+    xpath =crawler.etree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
+    print(''.join(xpath[0].itertext()))

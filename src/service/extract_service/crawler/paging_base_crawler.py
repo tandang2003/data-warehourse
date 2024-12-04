@@ -6,7 +6,7 @@ from datetime import datetime
 
 from selenium.common import WebDriverException, NoSuchElementException
 
-from src.service.AppException import AppException, handle_app_exception, LEVEL
+from src.service.AppException import AppException, LEVEL
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.util.file_util import write_json_to_csv
 from src.util.validation_util import check_url_valid
@@ -16,7 +16,7 @@ class PagingBase(BaseCrawler):
 
     def __init__(self,
                  limit_page,
-                 format_file,
+                 file_format,
                  extension,
                  prefix,
                  data_dir_path,
@@ -29,7 +29,7 @@ class PagingBase(BaseCrawler):
                  navigate_scenario):
         super().__init__()
         self._limit_page = limit_page
-        self._format_file = format_file
+        self._file_format = file_format
         self._extension = extension
         self._prefix = prefix
         self._data_dir_path = data_dir_path
@@ -148,7 +148,7 @@ class PagingBase(BaseCrawler):
     def handle_success(self):
         data = self._list_item
         # 10.1 lấy ra thời gian hiện tại
-        current_date = datetime.now().strftime(self._format_file)
+        current_date = datetime.now().strftime(self._file_format)
         # 10.2 tạo tên file
         filename = f"{self._prefix}{current_date}.{self._extension}"
         # 10.3  Tạo đường dẫn đến file lưu dữ liệu, từ đường dẫn thư mục và tên file được tạo
@@ -167,7 +167,7 @@ class PagingBase(BaseCrawler):
     # 11 Xử lý ngoại lệ
     def handle_exception(self, exception: AppException):
         # 11.1 Tạo file name error
-        filename = f"{self._prefix}{self._format_file}.log"
+        filename = f"{self._prefix}{self._file_format}.log"
         path = os.path.join(self._error_dir_path, filename)
         # 11.2 cài đặt file name error vào exception
         exception.file_error = filename
@@ -187,7 +187,7 @@ class PagingBase(BaseCrawler):
         method = field_properties.get("method", None)
         selector = field_properties.get("selector", None)
         attribute = field_properties.get("attribute", None)
-        quantity = field_properties.get("quantity", 0)
+        quantity = field_properties.get("quantity", 1)
         regex = field_properties.get("regex", None)
         xpath = self.find_elements_with_xpath(selector)
 
@@ -248,29 +248,9 @@ class PagingBase(BaseCrawler):
         # 14.2 Tạo regex xpath từ regex pattern
         id_pattern = fr"{regex_pattern}".replace("\\\\", "\\")
         # 14.3 Trích xuất text từ xpath
-        text = xpath[0].text_content().strip()
+        text =''.join(xpath[0].itertext())
         # 14.4 Áp dụng regex trong text
         match = re.search(id_pattern, text)
         if match:
             return match.group(1)
         return None
-
-# if __name__ == '__main__':
-#     from lxml import html
-#
-#     # The provided HTML
-#     html_content = """
-#    <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,12 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,12 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->6125271225</div></div>
-#     """
-#
-#     # Parse the HTML string
-#     tree = html.fromstring(html_content)
-#
-#     # Corrected XPath to select the div with class "date"
-#     xpath = tree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
-#
-#     # Extract and print the text content
-#     if xpath:
-#         print(xpath[0].text_content().strip())
-#     else:
-#         print("No matching element found.")
