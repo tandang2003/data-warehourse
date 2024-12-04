@@ -90,7 +90,7 @@ class PagingBase(BaseCrawler):
             # 13.2.2 hợp lệ
             driver = self.driver.page_source
 
-            # 13.3 Xóa các thẻ không cần thiết
+            # Xóa các thẻ không cần thiết
             self.clean_html(driver)
             result = {}
 
@@ -254,3 +254,23 @@ class PagingBase(BaseCrawler):
         if match:
             return match.group(1)
         return None
+
+# if __name__ == '__main__':
+#     from lxml import html
+#
+#     # The provided HTML
+#     html_content = """
+#    <div class="sc-6orc5o-15 jiDXp"><h1>Bán nhà 100m2 Nguyễn Trãi, Q.1 chỉ 23,12 tỷ</h1><div class="sc-6orc5o-16 jGIyZP"><div class="price">23,12 tỷ</div></div><div class="address"><span class="sc-1vo1n72-6 bZuuMO"></span>212/12, Đường Nguyễn Trãi, Phường Nguyễn Cư Trinh, Quận 1, TP.HCM</div><div class="date"><span class="sc-1vo1n72-7 fGnMSX"></span>Ngày đăng: <!-- -->Hôm nay<!-- --> - Mã tin: <!-- -->6125271225</div></div>
+#     """
+#
+#     # Parse the HTML string
+#     tree = html.fromstring(html_content)
+#
+#     # Corrected XPath to select the div with class "date"
+#     xpath = tree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
+#
+#     # Extract and print the text content
+#     if xpath:
+#         print(xpath[0].text_content().strip())
+#     else:
+#         print("No matching element found.")

@@ -46,11 +46,5 @@ class CrawlController(Controller):
 
 
 if __name__ == '__main__':
-    crawler = BaseCrawler()
-    crawler.setup_driver()
-    crawler.get_url('https://muaban.net/bat-dong-san/ban-nha-mat-tien-huyen-binh-chanh-ho-chi-minh/so-hong-rieng-gan-cho-binh-dien-id0-id69546466')
-    crawler.wait(5)
-    page_source = crawler.driver.page_source
-    crawler.clean_html(page_source)
-    xpath =crawler.etree.xpath("//*[contains(@class, 'sc-6orc5o-15 jiDXp')]//*[@class='date']")
-    print(''.join(xpath[0].itertext()))
+    c = CrawlController()
+    c.get_config()
