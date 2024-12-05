@@ -56,9 +56,11 @@ class AppException(Exception):
 
     def _handle_sent_email(self):
         sent_mail(f"""
-                            Level: {self._level.name}
-                            Message: {self._message}        
-                            File name: {self._file_name}
+                            <p><b>Level:</b> {self._level.name}</p>
+                            <p><b>Status:</b> {self._level.name}</p>
+                            <p><b>Code:</b> {self._level.value}</p>
+                            <p><b>Message:</b> {self._message}</p>   
+                            <p><b>File log:</b> {self._file_name}</p>
                             """, EmailCategory.ERROR)
 
     @property
@@ -68,5 +70,3 @@ class AppException(Exception):
     @file_error.setter
     def file_error(self, file_name):
         self._file_name = file_name
-
-
