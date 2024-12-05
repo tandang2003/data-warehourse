@@ -5,6 +5,7 @@ from src.config.setting import SERVER_HOST, SERVER_PORT
 from src.service.controller_service.crawl_controller import CrawlController
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
+import uvicorn
 
 app = FastAPI()
 scheduler = BackgroundScheduler()
@@ -30,24 +31,28 @@ def insert_new_log_crawler_daily():
 # HÀm này dùng để load data từ file vào staging
 # Hiện thực code ở thư mục src/service/load_data_service
 def load_data_from_file_to_staging():
+    # Lấy cấu từ controller
     # crawl_controller.call_staging_procedure('load_data_from_file_to_staging', ())
     pass
 
 # Hàm này dùng để transform data
 # Hiện thực code ở thư mục src/service/transform_service
 def transforms_data():
+    # Lấy cấu từ controller
     # crawl_controller.call_staging_procedure('transforms_data', ())
     pass
 
 # Hàm này dùng để load data từ staging vào warehouse
 # Hiện thực code ở thư mục src/service/load_data_warehourse_service
 def load_data_from_staging_to_warehouse():
+    # Lấy cấu từ controller
     # crawl_controller.call_staging_procedure('load_data_from_staging_to_warehouse', ())
     pass
 
 # Hàm này dùng để load data từ warehouse vào data mart
 # Hiện thực code ở thư mục src/service/aggerate_service
 def load_data_from_warehouse_to_data_mart():
+    # Lấy cấu từ controller
     # crawl_controller.call_staging_procedure('load_data_from_warehouse_to_data_mart', ())
     pass
 
@@ -82,8 +87,3 @@ if __name__ == '__main__':
         port=SERVER_PORT,
         reload=True
     )
-    # c = CrawlController()
-    # c.get_config()
-
-    # c = CrawlController()
-    # c.get_config()

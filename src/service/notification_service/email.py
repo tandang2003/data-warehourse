@@ -27,7 +27,7 @@ async def sent_mail(message: str, type: EmailCategory):
         subject=subject,
         body=message,
         recipients=MAIL_TO,
-        subtype="plain"
+        subtype="html"
     )
     fm = FastMail(email_config)
     try:
