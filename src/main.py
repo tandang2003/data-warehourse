@@ -7,6 +7,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 import uvicorn
 
+from src.service.controller_service.transformation_controller import TransformationController
+from src.service.transformation_service.transformation_service import Transformation
+
 app = FastAPI()
 scheduler = BackgroundScheduler()
 app.add_middleware(
@@ -17,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 crawl_controller = CrawlController()
+transformation_controller = TransformationController()
 
 
 def crawl_data():
@@ -35,11 +39,11 @@ def load_data_from_file_to_staging():
     # crawl_controller.call_staging_procedure('load_data_from_file_to_staging', ())
     pass
 
-# Hàm này dùng để transform data
+# Hàm này dùng để transform data và load data vào warehouse
 # Hiện thực code ở thư mục src/service/transform_service
 def transforms_data():
     # Lấy cấu từ controller
-    # crawl_controller.call_staging_procedure('transforms_data', ())
+    transformation_controller.get_config()
     pass
 
 # Hàm này dùng để load data từ staging vào warehouse
@@ -69,8 +73,6 @@ def startup_event():
                       id='load_data_from_file_to_staging', replace_existing=True)
     scheduler.add_job(transforms_data, IntervalTrigger(minutes=20),
                       id='transforms_data', replace_existing=True)
-    scheduler.add_job(load_data_from_staging_to_warehouse, IntervalTrigger(minutes=20),
-                      id='load_data_from_staging_to_warehouse', replace_existing=True)
     scheduler.add_job(load_data_from_warehouse_to_data_mart, IntervalTrigger(minutes=20),
                       id='load_data_from_warehouse_to_data_mart', replace_existing=True)
 

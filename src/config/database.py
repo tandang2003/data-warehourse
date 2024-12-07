@@ -1,5 +1,3 @@
-import json
-
 import mysql.connector
 from mysql.connector import Error
 
@@ -24,7 +22,8 @@ class MySQLCRUD:
                 port=port,
                 user=user,
                 password=password,
-                database=database
+                database=database,
+                autocommit=True
             )
             print(f"Connection pool created with pool size: {pool_size}")
         except Error as e:
