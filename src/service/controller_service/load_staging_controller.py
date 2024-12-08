@@ -1,7 +1,6 @@
 import mysql.connector
 
-from src.config.database import staging_connector
-from src.config.procedure import get_log_load_staging, get_script_load_file_by_source
+from src.config.procedure import get_script_load_file_by_source
 from src.service.controller_service.database_controller import Controller
 
 
@@ -41,7 +40,5 @@ class LoadStagingController(Controller):
 
 
 if __name__ == '__main__':
-    import asyncio
-
     c = LoadStagingController()
     c.get_config()
