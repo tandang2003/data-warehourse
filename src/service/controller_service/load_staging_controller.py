@@ -11,36 +11,37 @@ class LoadStagingController(Controller):
 
     def get_config(self):
         # 10.2 Gọi hàm call_procedure (4.1) để lấy cấu hình cho load staging
-        data = self.call_controller_procedure(get_log_load_staging, ())
+        # data = self.call_controller_procedure(get_log_load_staging, ())
+        #
+        # # 10.3 kiểm tra các thông số cấu hình lấy về data != None
+        # if data is None:
+        #     # 10.3.1 Không lấy được cấu hình
+        #     return
+        # print(data['name'])
+        # print(data['file_part'])
 
-        # 10.3 kiểm tra các thông số cấu hình lấy về data != None
-        if data is None:
-            # 10.3.1 Không lấy được cấu hình
-            return
-        print(data['name'])
-        print(data['file_part'])
+        data = {
+            'name': 'batdongsan.com.vn',
+            'file_part': 'D:/university/data_warehouse/sql/data/batdongsan_com_vn_data.csv'
+        }
         # 10.3.2 Lấy được cấu hình
         # 10.4 Lấy đoạn script load file từ database
-        script= self.call_controller_procedure(get_script_load_file_by_source, (data['name'], data['file_part']))
-        print(script)
+        sql_list = self.call_controller_procedure(get_script_load_file_by_source, (data['name'], data['file_part']))
         connection = self.get_staging_connection()
-        # commands = script.split(";")
         cursor: mysql.connector.connection.MySQLCursor = connection.cursor()
-        cursor.execute("SET GLOBAL local_infile = 1;")
-        # for command in commands:
-        #     command = command.strip()
-        #     if command:  # Bỏ qua lệnh rỗng
-        #         print(f"Executing command: {command}")
-        #         cursor.execute(command)
-        script=script['load_file_script']
-        script=script.replace("\\","")
-        print(script)
+        print(sql_list)
         try:
-            cursor.execute(script)
+            for sql in sql_list:
+                step = sql['step']
+                sql_statement = sql['sql_statement']
+                print(f"Executing step: {step}")
+                cursor.execute(sql_statement)
         except Exception as e:
             print(f"Error: {e}")
 
+
 if __name__ == '__main__':
     import asyncio
+
     c = LoadStagingController()
     c.get_config()
