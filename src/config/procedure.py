@@ -1,3 +1,4 @@
+insert_new_log_crawler = "insert_new_log_crawler"
 procedure_get_database_config = "get_database_config"
 get_log_crawler = "get_log_crawler"
 insert_log_crawler = "insert_log_crawler"

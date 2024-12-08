@@ -2,6 +2,8 @@ import logging
 import traceback
 from enum import Enum
 
+from selenium.common import WebDriverException
+
 from src.service.notification_service.email import EmailTemplate, LABEL
 
 

@@ -22,20 +22,20 @@ class LoadStagingController(Controller):
 
         data = {
             'name': 'batdongsan.com.vn',
-            'file_part': 'D:/university/data_warehouse/sql/data/batdongsan_com_vn_data.csv'
+            'file_part': 'D:/pycharm/data/batdongsan_com_vn_data.csv'
         }
         # 10.3.2 Lấy được cấu hình
         # 10.4 Lấy đoạn script load file từ database
         sql_list = self.call_controller_procedure(get_script_load_file_by_source, (data['name'], data['file_part']))
+        print(sql_list['load_file_script'])
+        sql_list=  str(sql_list['load_file_script']).split(';')
         connection = self.get_staging_connection()
         cursor: mysql.connector.connection.MySQLCursor = connection.cursor()
-        print(sql_list)
+        # print(sql_list)
         try:
             for sql in sql_list:
-                step = sql['step']
-                sql_statement = sql['sql_statement']
-                print(f"Executing step: {step}")
-                cursor.execute(sql_statement)
+                print(f"Executing step: {sql}")
+                cursor.execute(sql)
         except Exception as e:
             print(f"Error: {e}")
 

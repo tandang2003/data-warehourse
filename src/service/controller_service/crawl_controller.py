@@ -7,10 +7,6 @@ class CrawlController(Controller):
     def __init__(self):
         super().__init__()
 
-    def call(self):
-        data = self.call_controller_procedure("get_log_crawler", ())
-        return "call"
-
     def get_config(self):
         # 6.2 Gọi hàm call_procedure (4.1) để lấy cấu hình cho crawler
         data = self.call_controller_procedure(get_log_crawler, ())
