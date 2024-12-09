@@ -69,7 +69,7 @@ class PagingBase(BaseCrawler):
             logging.info(self._list_item)
             # 7.7 gọi hàm handle_success() đễ xử lý thành công
             return self.handle_success()
-        except AppException as e:
+        except AppException | WebDriverException as e:
             # 7.8 Gọi hàm handle_exception() để xử lý lỗi
             return self.handle_exception(e)
 
