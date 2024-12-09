@@ -56,9 +56,8 @@ class MySQLCRUD:
             # 2.1 trả connection nhận được từ pool
             return connection
         except Error as e:
-            return None
-            # 2.2.gửi một email báo lỗi với email mặc định được lưu trên server
-            # TODO send mail
+            # 2.2.gửi lỗi phát sinh ra hàm sử dụng
+            raise Exception(f"Failed to get connection from pool: {e}")
 
     def __staging_establish_pool(self):
         # 1.Lấy connection của controller thông qua hàm get_controller_conection
@@ -97,9 +96,8 @@ class MySQLCRUD:
             # 2.1 trả  connection nhận được từ pool
             return connection
         except Error as e:
-            return None
-            # 2.2.gửi một email báo lỗi với email mặc định được lưu trên server
-            # TODO send mail
+            # 2.2.gửi lỗi phát sinh ra hàm sử dụng
+            raise Exception(f"Failed to get connection from pool: {e}")
 
     def __warehouse_establish_pool(self):
         # 1.Lấy connection của controller thông qua hàm get_controller_conection
