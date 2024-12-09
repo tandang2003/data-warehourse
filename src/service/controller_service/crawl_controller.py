@@ -11,7 +11,6 @@ class CrawlController(Controller):
         # 6.2 Gọi hàm call_procedure (4.1) để lấy cấu hình cho crawler
         data = self.call_controller_procedure(get_log_crawler, ())
 
-
         # # 6.3 Kiểm tra các thông ố lấy về data != None
         if data is None:
             # 6.3.1 Không lấy được cấu hình
@@ -19,7 +18,8 @@ class CrawlController(Controller):
         #
         # # 6.3.2 Lấy được cấu hình
         # # 6.4 Khởi tạo đối tượng PagingBase với các thông số lấy về từ database
-        crawl = PagingBase(limit_page=data['limit_page'],
+        crawl = PagingBase(email=data['email'],
+                           limit_page=data['limit_page'],
                            file_format=data['file_format'],
                            extension=data['file_extension'],
                            prefix=data['prefix'],

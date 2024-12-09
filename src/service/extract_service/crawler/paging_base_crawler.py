@@ -16,6 +16,7 @@ from src.util.validation_util import check_url_valid
 class PagingBase(BaseCrawler):
 
     def __init__(self,
+                 email,
                  limit_page,
                  file_format,
                  extension,
@@ -29,6 +30,7 @@ class PagingBase(BaseCrawler):
                  scenario,
                  navigate_scenario):
         super().__init__()
+        self._email = email,
         self._limit_page = limit_page
         self._file_format = file_format
         self._extension = extension
@@ -183,7 +185,7 @@ class PagingBase(BaseCrawler):
         # 11.2 cài đặt file name error vào exception
         exception.file_error = filename
         # 11.3 gọi hàm handler_exception trong exception (15)
-        exception.handle_exception()
+        exception.handle_exception(self._email)
         # 11.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,

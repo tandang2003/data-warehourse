@@ -13,12 +13,14 @@ class Transformation:
                  controller: Controller,
                  prefix,
                  file_format,
+                 email,
                  error_dir_path):
         self._source = source_name
         self._controller = controller
         self._prefix = prefix
         self._file_format = file_format
         self._error_dir_path = error_dir_path
+        self._email = email
 
     def handle(self):
         # 17.1 Khởi tạo count_row để đếm số dòng transform
@@ -65,6 +67,7 @@ class Transformation:
                                        code=STATUS.STAGING_PENDING.value,
                                        message="Success",
                                        file_log=None,
+                                       recipients=self._email,
                                        label=LABEL.INFO)
 
         # 18.2 Tiến hành gửi mail
@@ -86,7 +89,7 @@ class Transformation:
         exception.file_error = filename
         exception._status = STATUS.STAGING_ERROR
         # 19.3 gọi hàm handler_exception trong exception (15)
-        exception.handle_exception("TRANSFORMATION ERROR")
+        exception.handle_exception(self._email)
         # 19.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,

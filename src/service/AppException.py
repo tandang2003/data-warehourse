@@ -29,7 +29,7 @@ class AppException(Exception):
         self._file_name = file_name
 
     # 15
-    def handle_exception(self):
+    def handle_exception(self, email):
         # 15.1 Kiểm tra level là thuộc level error
         if self._status is not None and self._status in STATUS_ERROR:
             self._handle_save_error_log()
@@ -37,7 +37,7 @@ class AppException(Exception):
         # 15.2 Kiểm tra message != None
         if self._message:
             # 15.2.1 Gọi hàm sent mail
-            self._handle_sent_email()
+            self._handle_sent_email(email)
 
     def _handle_save_error_log(self):
         stack_trace = traceback.format_exc()
@@ -56,12 +56,13 @@ class AppException(Exception):
         # 15.1.2 lưu stack trace vào file
         logging.error(f"Error log saved {self._file_name}", exc_info=True)
 
-    def _handle_sent_email(self):
+    def _handle_sent_email(self, email):
         email_template = EmailTemplate(subject="Test",
                                        status=self._status.name,
                                        code=self._status.value,
                                        message=self._message,
                                        file_log=self._file_name,
+                                       recipients=email,
                                        label=LABEL.ERROR)
         email_template.sent_mail()
 

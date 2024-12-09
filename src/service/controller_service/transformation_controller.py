@@ -22,6 +22,7 @@ class TransformationController(Controller):
                                         file_format=data['file_format'],
                                         prefix=data['prefix'],
                                         error_dir_path=data['error_dir_path'],
+                                        email=data['email'],
                                         controller=self)
 
         # 16.5. Gọi PagingBase.handle() (17) để tiến hành transform data

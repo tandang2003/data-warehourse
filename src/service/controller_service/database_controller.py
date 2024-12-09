@@ -1,6 +1,7 @@
 from src.config.database import MySQLCRUD
 from src.config.setting import CONTROLLER_DB_PORT, CONTROLLER_DB_HOST, CONTROLLER_DB_NAME, CONTROLLER_DB_USER, \
     CONTROLLER_DB_PASS, CONTROLLER_DB_POOL_NAME, CONTROLLER_DB_POOL_SIZE
+from src.service.notification_service.email import EmailTemplate, LABEL
 
 
 class Controller:
@@ -16,6 +17,15 @@ class Controller:
             pool_name=CONTROLLER_DB_POOL_NAME,
             pool_size=CONTROLLER_DB_POOL_SIZE
         )
+        if self.__connector is None:
+            email = EmailTemplate(
+                subject="Controller Database Connected",
+                status="Success",
+                code=200,
+                message="Controller Database Connected",
+                label=LABEL.INFO
+            )
+            email.sent_mail()
 
         print(f"Connection pool created with pool size: {CONTROLLER_DB_POOL_SIZE}")
 
