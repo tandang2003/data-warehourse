@@ -31,11 +31,16 @@ class MySQLCRUD:
             print(f"Error creating connection pool: {e}")
 
     def get_controller_connection(self):
+        # 1.2 Kiểm tra trong quá trình lấy connection có bị lỗi hay không
         try:
+            # 1.1 Lấy connection controller từ controller_pool
+            # 1.2.1 Không có lỗi sảy ra
             connection = self.__controller_pool.get_connection()
+            # 1.3.1 trả connection nhận được từ pool
             return connection
         except Error as e:
-            #     else send mail
+            #1.2.2 Có bị lỗi
+            #1.3.2 gửi lỗi phát sinh ra hàm sử dụng
             raise Exception(f"Failed to get connection from pool: {e}")
             # return None
 
